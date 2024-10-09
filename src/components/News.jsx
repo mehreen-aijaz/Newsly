@@ -9,52 +9,52 @@ export default class News extends Component {
     pageSize: 7,
     category: "general",
   };
+
   static propTypes = {
     country: PropTypes.string,
     pageSize: PropTypes.number,
     category: PropTypes.string,
   };
+
   articles = [];
+
   constructor() {
     super();
-    // console.log("Hello i am a constructor");
     this.state = {
       articles: this.articles,
       loading: true,
       page: 1,
     };
   }
+
   async componentDidMount() {
-    console.log("cdm");
-    let url = ` https://newsapi.org/v2/top-headlines?sources=bbc-news&apiKey=d1900887260f4d66bccd1bdef5308ddd&pageSize=${this.props.pageSize}`;
+    let url = `https://newsapi.org/v2/top-headlines?sources=bbc-news&apiKey=${process.env.REACT_APP_API_KEY}&pageSize=${this.props.pageSize}`;
     this.setState({ loading: true });
     let data = await fetch(url);
     let parsedData = await data.json();
-    console.log(parsedData);
     this.setState({
       articles: parsedData.articles,
       totalResults: parsedData.totalResults,
       loading: false,
     });
   }
+
   handlePrevClick = async () => {
-    let url = ` https://newsapi.org/v2/top-headlines?country=${
+    let url = `https://newsapi.org/v2/top-headlines?country=${
       this.props.country
-    }&category=${
-      this.props.category
-    }&apiKey=d1900887260f4d66bccd1bdef5308ddd&page=${
-      this.state.page - 1
-    }&pageSize=${this.props.pageSize}`;
+    }&category=${this.props.category}&apiKey=${
+      process.env.REACT_APP_API_KEY
+    }&page=${this.state.page - 1}&pageSize=${this.props.pageSize}`;
     this.setState({ loading: true });
     let data = await fetch(url);
     let parsedData = await data.json();
-    console.log(parsedData);
     this.setState({
       page: this.state.page - 1,
       articles: parsedData.articles,
       loading: false,
     });
   };
+
   handleNextClick = async () => {
     if (
       !(
@@ -62,31 +62,27 @@ export default class News extends Component {
         Math.ceil(this.state.totalResults / this.props.pageSize)
       )
     ) {
+      let url = `https://newsapi.org/v2/top-headlines?country=${
+        this.props.country
+      }&category=${this.props.category}&apiKey=${
+        process.env.REACT_APP_API_KEY
+      }&page=${this.state.page + 1}&pageSize=${this.props.pageSize}`;
+      this.setState({ loading: true });
+      let data = await fetch(url);
+      let parsedData = await data.json();
+      this.setState({
+        page: this.state.page + 1,
+        articles: parsedData.articles,
+        loading: false,
+      });
     }
-    let url = `https://newsapi.org/v2/top-headlines?country=${
-      this.props.country
-    }&category=${
-      this.props.category
-    }&apiKey=d1900887260f4d66bccd1bdef5308ddd&page=${
-      this.state.page + 1
-    }&pageSize=${this.props.pageSize}`;
-    this.setState({ loading: true });
-    let data = await fetch(url);
-    let parsedData = await data.json();
-    console.log(parsedData);
-    this.setState({
-      page: this.state.page + 1,
-      articles: parsedData.articles,
-      loading: false,
-    });
   };
+
   render() {
-    console.log("render");
     return (
       <div className="container">
         <h2 className="my-4 text-center">NewsWave - Top Headlines</h2>
         {this.state.loading && <Spinner />}
-
         <div className="row ">
           {!this.state.loading &&
             this.state.articles.map((element) => {
